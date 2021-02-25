@@ -32,6 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $home_team_foul = $_POST['home_team_foul'];
     $away_team_foul = $_POST['away_team_foul'];
     $game_type = $_POST['game_type'];
+	$serve = $_POST['serve'];
 
     if ($game_type == "basketball_scores") {
 
@@ -55,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             $response['message'] = "Data successfully saved.";
         }
-    } else {
+    } else if ($game_type == "common_scores") {
 
         $sql = "select * from " . $game_type . " where game_name = '" . $game_name . "' and period = '" . $period . "'";
         $query = mysqli_query($conn, $sql);
@@ -77,7 +78,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $response['message'] = "Data successfully saved.";
         }
 
-    }
+    } else {
+		
+		  $sql = "select * from " . $game_type . " where game_name = '" . $game_name . "' and period = '" . $period . "'";
+        $query = mysqli_query($conn, $sql);
+        $count = mysqli_num_rows($query);
+
+        if ($count > 0) {
+
+            mysqli_query($conn, "update " . $game_type . " set game_name = '" . $game_name . "', home_team = '" . $home_team . "'
+                ,away_team = '" . $away_team . "' ,away_team_score = '" . $away_team_score . "' ,home_team_score = '" . $home_team_score . "' ,serve = '" . $serve . "',period = '" . $period . "' where game_name = '" . $game_name . "' and period = '" . $period . "'"
+            );
+            $response['message'] = "Data successfully saved.";
+
+        } else {
+
+            mysqli_query($conn, "INSERT INTO " . $game_type . " (game_name, home_team ,away_team, away_team_score, home_team_score, period,serve)
+        VALUES ('" . $game_name . "','" . $home_team . "', '" . $away_team . "', $away_team_score, $home_team_score, $period, $serve)");
+
+            $response['message'] = "Data successfully saved.";
+        }
+		
+		
+	}
 
 } else {
     $response['error'] = true;
@@ -86,3 +109,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 //displaying the data in json format
 echo json_encode($response);
+
+
+
